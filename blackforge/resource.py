@@ -23,13 +23,19 @@ class Clock:
 
 class Window:
     def __init__(self, width:int=800, height:int=600, title:str="GFrame: Game Window", color:list[int]=[140, 130, 160]) -> None:
+        self.zoom:int = 2
         self.title:str=title
         self.color:list[int]=color
         self.size:list[int]=[width, height]
         self.display:pg.Surface=pg.display.set_mode(self.size)
-        self.canvas:pg.Surface=pg.Surface([int(self.size[0]/2), int(self.size[1]/2)])
+        self.canvas:pg.Surface=pg.Surface([int(self.size[0]/self.zoom), int(self.size[1]/self.zoom)])
         pg.display.set_caption(self.title)
         pg.display.set_icon(pg.image.load(f"{_blackforge_dir_}assets\\logo.png"))
+
+    def modZoom(self, delta:int) -> None:
+        if self.zoom + delta < 1 or self.zoom + delta > 6:
+            return
+        self.zoom += delta
 
     def setIcon(self, image:pg.Surface) -> None:
         try:
@@ -51,6 +57,7 @@ class Window:
     def render(self):
         self.display.blit(pg.transform.scale(self.canvas, self.size), [0, 0])
         pg.display.flip()
+        self.canvas = pg.Surface([int(self.size[0]/self.zoom), int(self.size[1]/self.zoom)])
 
 class Camera:
     def __init__(self, window) -> None:
@@ -80,8 +87,8 @@ class Camera:
         halfWidth = self.window.canvas.size[0] / 2
         halfHeight = self.window.canvas.size[1] / 2
 
-        self.rawScroll[0] += (centerX - halfWidth - self.rawScroll[0]) / self.subPixelCount
-        self.rawScroll[1] += (centerY - halfHeight - self.rawScroll[1]) / self.subPixelCount
+        self.rawScroll[0] += (centerX - halfWidth - self.rawScroll[0]) / self.subPixelCount * self.window.zoom
+        self.rawScroll[1] += (centerY - halfHeight - self.rawScroll[1]) / self.subPixelCount * self.window.zoom
     
         max_scroll_x = self.bounds[0] - self.window.canvas.size[0]
         max_scroll_y = self.bounds[1] - self.window.canvas.size[1]
