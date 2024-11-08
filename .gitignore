@@ -1,0 +1,10 @@
+*.bat
+main.py
+setup.py
+
+venv/
+dist/
+assets/
+_local_/
+*.egg-info/
+__pycache__/
