@@ -1,10 +1,10 @@
 *.bat
-main.py
-setup.py
 
-venv/
-dist/
-assets/
-_local_/
-*.egg-info/
+/dist/
+/venv/
+/main.py
+/setup.py
+/assets/
+/_local_/
+egg-info/
 __pycache__/
