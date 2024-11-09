@@ -2,12 +2,11 @@ import os, sys
 from itertools import count
 import re, random, time, datetime, ctypes
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = str(True)
-import pygame as pg, numpy as np, moderngl as mgl, glm, glfw
+import pygame as pg
+import numpy as np, moderngl as mgl, glm, glfw
+
 
 _blackforge_dir_:str = __file__.removesuffix(f"{__name__.split(".")[1]}.py")
-
-_sprite_max_:int=65_000
-_sprite_count_:count=count(start=0)
 
 def _setConsoleTextAttr(color):
     if sys.platform == "win32":

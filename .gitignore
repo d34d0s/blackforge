@@ -1,4 +1,6 @@
 *.bat
+*.egg-info/
+__pycache__/
 
 /dist/
 /venv/
@@ -6,5 +8,3 @@
 /setup.py
 /assets/
 /_local_/
-egg-info/
-__pycache__/

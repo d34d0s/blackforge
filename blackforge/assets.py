@@ -1,6 +1,6 @@
 from .utils import bitmask
+from .globs import pg, os, re
 from .resource import Window, Camera
-from .__globs__ import pg, os, re, _sprite_count_
 
 # ------------------------------------------------------------ #
 class AssetManager:

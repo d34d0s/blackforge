@@ -1,8 +1,9 @@
-import blackforge.resource, blackforge.events, blackforge.assets, blackforge.gameworld
-from .__globs__ import _logger
+import blackforge.resource, blackforge.events, blackforge.assets, blackforge.world
+from .globs import _logger
 
 class Application:
     assets = blackforge.assets.AssetManager()
+    
     def __init__(
             self,
             name:str,
@@ -17,15 +18,15 @@ class Application:
         self.camera = blackforge.resource.Camera(self.window)
         config() if config else _logger.log(_logger.LOG_WARNING, "Application `config()` Method Not Passed To Constructor | Make Sure To Configure Your App!")
 
-    def getTilemap(self, mapName:str) -> blackforge.gameworld.TileMap|None:
+    def getTilemap(self, mapName:str) -> blackforge.world.TileMap|None:
         try:
             return self.tilemaps.get(mapName, None)
         except (KeyError) as err: ...
 
-    def createTilemap(self, mapName:str, mapPath:str) -> str|None:
+    def newTilemap(self, mapName:str, mapPath:str) -> blackforge.world.TileMap|None:
         if not self.tilemaps.get(mapName, 0):
-            self.tilemaps[mapName] = blackforge.gameworld.TileMap(self, mapPath)
-            return mapName
+            self.tilemaps[mapName] = blackforge.world.TileMap(self, mapPath)
+            return self.tilemaps[mapName]
         return None
 
     def setMethods(

@@ -65,48 +65,48 @@ def loadWorldForge2Data(app, mapPath:str) -> dict[str]:
             mapSrc.close()
 
     tiles = []
-    tileInfo = []
+    tileInfo = {"background":{}, "midground":{}, "foreground":{}}
     while layers:
         layer = layers.pop(0)
         for gridLocation in data[layer]:
+            tileLayer = data[layer][gridLocation]["layer"]
             location = gridLocation.split(";")
             location[0] = int(location[0])
             location[1] = int(location[1])
 
             size = int(data["mapInfo"]["tilesize"])
-            variant = data[layer][gridLocation]["id"]
-            asset = data[layer][gridLocation]["asset"]
-            layer = data[layer][gridLocation]["layer"]
-            physical = data[layer][gridLocation]["properties"]["collisions"]
-            tileInfo.append(
-                {
-                    "size": size,
-                    "layer": layer,
-                    "location": location,
-                    "physical": physical,
-                    "asset": asset,
-                    "variant": variant,
-                }
-            )
-            tiles.append(StaticTile(app, asset, size, location, physical, variant, layer))
+            variant = data[tileLayer][gridLocation]["id"]
+            asset = data[tileLayer][gridLocation]["asset"]
+            physical = data[tileLayer][gridLocation]["properties"]["collisions"]
+            tileInfo[tileLayer][gridLocation] = {
+                "size": size,
+                "layer": tileLayer,
+                "location": location,
+                "physical": physical,
+                "asset": asset,
+                "variant": variant,
+            }
+            tiles.append(StaticTile(app, asset, size, location, physical, variant, tileLayer))
     return {"tileInfo": tileInfo, "mapInfo": data["mapInfo"], "tiles": tiles}
 
 class TileMap:
     def __init__(self, app, mapPath:str) -> None:
         self.app = app
-        self.data = {}
-        self.info = {}
+        self.data = {
+            "tiles": {"background":{}, "midground":{}, "foreground":{}},
+            "mapInfo": {},
+        }
         self.tileSize = 8
         self.configure(mapPath)
     
     def configure(self, mapPath:str) -> None:
         data = loadWorldForge2Data(self.app, mapPath)
-        self.info = data["mapInfo"]
-        self.tileSize = self.info["tilesize"]
+        self.data["mapInfo"] = data["mapInfo"]
+        self.tileSize = data["mapInfo"]["tilesize"]
         for tile in data["tiles"]:
             strLocation = f"{int(tile.location[0]//self.tileSize)};{int(tile.location[1]//self.tileSize)}"
             tile.location = [*map(int, strLocation.split(";"))]
-            self.data[tile.layer][strLocation] = tile
+            self.data["tiles"][tile.layer][strLocation] = tile
 
     def getLookupRegion(self, regionOffset:list[int]=[0, 0]) -> list[list]:
         return [
@@ -123,18 +123,18 @@ class TileMap:
             ( 1,  1 )   , # bottom-right
         ]
 
-    def getTilesInRegion(self, location, regionOffset:list[int]=[0, 0]) -> list[set]:
+    def getTilesInRegion(self, location, layer:str="background", regionOffset:list[int]=[0, 0]) -> list[set]:
         tiles = []
         tileLocation = (int(location[0] // self.tileSize), int(location[1] // self.tileSize))
         for offset in self.getLookupRegion(regionOffset):
             strLocation = f"{tileLocation[0] + offset[0] + regionOffset[0]};{tileLocation[1] + offset[1] + regionOffset[1]}"
-            if strLocation in self.data:
-                tiles.append(self.data[strLocation])
+            if strLocation in self.data["tiles"][layer]:
+                tiles.append(self.data["tiles"][layer][strLocation])
         return tiles
 
-    def lookupTiles(self, location, regionOffset:list[int]=[0, 0]):
+    def lookupTiles(self, location:list[int], layer:str="background", regionOffset:list[int]=[0, 0]):
         rects = []
-        for tile in self.getTilesInRegion(location, regionOffset):
+        for tile in self.getTilesInRegion(location=location, layer=layer, regionOffset=regionOffset):
             if tile.physical:
                 rects.append(blackforge.assets.createRect(
                     size=[self.tileSize, self.tileSize],
@@ -146,13 +146,12 @@ class TileMap:
         window = self.app.window
         scroll = self.app.camera.scroll
 
-        for layer in ("background", "midground", "foreground"):
-            if layer not in self.data: continue
+        for layer in self.data["tiles"]:
             for x in range(scroll[0] // self.tileSize, (scroll[0] + window.size[0]) // self.tileSize + 1):
                 for y in range(scroll[1] // self.tileSize, (scroll[1] + window.size[1]) // self.tileSize + 1):
                     strLocation = f"{x};{y}"
-                    if strLocation not in self.data[layer]: continue
-                    tile = self.data[layer][strLocation]
+                    if strLocation not in self.data["tiles"][layer]: continue
+                    tile = self.data["tiles"][layer][strLocation]
                     tile.render(self.app.window, offset=self.app.camera.scroll, showRect=showRects)
 
 class SkyBox:

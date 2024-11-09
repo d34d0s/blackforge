@@ -1,5 +1,5 @@
 import blackforge.assets
-from .__globs__ import pg
+from .globs import pg
 
 class Entity:
     def __init__(self, id:int, app, type:str, size:list[int], location:list[float], assetID:str=None) -> None:
@@ -77,7 +77,7 @@ class DynamicEntity(Entity):
         
         self.location[0] += transformation[0]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.location, self.regionOffset):
+        for tile in tilemap.lookupTiles(self.location, regionOffset=self.regionOffset):
             if rect.colliderect(tile):
                 if transformation[0] > 0:
                     rect.right = tile.left
@@ -89,7 +89,7 @@ class DynamicEntity(Entity):
 
         self.location[1] += transformation[1]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.location, self.regionOffset):
+        for tile in tilemap.lookupTiles(self.location, regionOffset=self.regionOffset):
             if rect.colliderect(tile):
                 if transformation[1] > 0:
                     rect.bottom = tile.top

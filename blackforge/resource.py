@@ -1,4 +1,4 @@
-from .__globs__ import _logger, pg, time, _sprite_count_, _blackforge_dir_
+from .globs import _logger, pg, time, _blackforge_dir_
 
 class Clock:
     FPS:int=0

@@ -1,4 +1,4 @@
-from .__globs__ import pg
+from .globs import pg
 
 class Controller:
     def __init__(self) -> None:
