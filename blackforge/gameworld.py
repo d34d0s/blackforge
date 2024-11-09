@@ -2,9 +2,10 @@ import os, random, json
 import blackforge.resource, blackforge.assets, blackforge.entity
 
 class StaticTile(blackforge.entity.StaticEntity):
-    def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0) -> None:
+    def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0, layer:str="background") -> None:
         super().__init__(0, app, "tile", [size, size], location, assetID=asset)
         self.asset:str = asset
+        self.layer:str = layer
         self.variant:int = variant
         self.physical:bool = physical
 
@@ -20,9 +21,10 @@ class StaticTile(blackforge.entity.StaticEntity):
         except (TypeError, AttributeError) as err: ...
 
 class DynamicTile(blackforge.entity.DynamicEntity):
-    def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0) -> None:
+    def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0, layer:str="background") -> None:
         super().__init__(0, app, "tile", [size, size], location, assetID=asset)
         self.asset:str = asset
+        self.layer:str = layer
         self.variant:int = variant
         self.physical:bool = physical
 
@@ -86,7 +88,7 @@ def loadWorldForge2Data(app, mapPath:str) -> dict[str]:
                     "variant": variant,
                 }
             )
-            tiles.append(StaticTile(app, asset, size, location, physical, variant))
+            tiles.append(StaticTile(app, asset, size, location, physical, variant, layer))
     return {"tileInfo": tileInfo, "mapInfo": data["mapInfo"], "tiles": tiles}
 
 class TileMap:
@@ -143,7 +145,9 @@ class TileMap:
     def render(self, showRects:bool=0) -> None:
         window = self.app.window
         scroll = self.app.camera.scroll
-        
+       
+        # 3rd for loop to account for tile layering
+        # or add layer objects to data hashmap
         for x in range(scroll[0] // self.tileSize, (scroll[0] + window.size[0]) // self.tileSize + 1):
             for y in range(scroll[1] // self.tileSize, (scroll[1] + window.size[1]) // self.tileSize + 1):
                 strLocation = f"{x};{y}"
