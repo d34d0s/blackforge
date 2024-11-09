@@ -147,12 +147,13 @@ class TileMap:
         scroll = self.app.camera.scroll
 
         for layer in ("background", "midground", "foreground"):
+            if layer not in self.data: continue
             for x in range(scroll[0] // self.tileSize, (scroll[0] + window.size[0]) // self.tileSize + 1):
                 for y in range(scroll[1] // self.tileSize, (scroll[1] + window.size[1]) // self.tileSize + 1):
                     strLocation = f"{x};{y}"
-                    if strLocation in self.data:
-                        tile = self.data[layer][strLocation]
-                        tile.render(self.app.window, offset=self.app.camera.scroll, showRect=showRects)
+                    if strLocation not in self.data[layer]: continue
+                    tile = self.data[layer][strLocation]
+                    tile.render(self.app.window, offset=self.app.camera.scroll, showRect=showRects)
 
 class SkyBox:
     def __init__(self, app, tilemap, cloudSize:list[int], cloudCount:int=16) -> None:
