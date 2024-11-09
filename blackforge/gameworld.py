@@ -106,7 +106,7 @@ class TileMap:
         for tile in data["tiles"]:
             strLocation = f"{int(tile.location[0]//self.tileSize)};{int(tile.location[1]//self.tileSize)}"
             tile.location = [*map(int, strLocation.split(";"))]
-            self.data[strLocation] = tile
+            self.data[tile.layer][strLocation] = tile
 
     def getLookupRegion(self, regionOffset:list[int]=[0, 0]) -> list[list]:
         return [
@@ -145,15 +145,14 @@ class TileMap:
     def render(self, showRects:bool=0) -> None:
         window = self.app.window
         scroll = self.app.camera.scroll
-       
-        # 3rd for loop to account for tile layering
-        # or add layer objects to data hashmap
-        for x in range(scroll[0] // self.tileSize, (scroll[0] + window.size[0]) // self.tileSize + 1):
-            for y in range(scroll[1] // self.tileSize, (scroll[1] + window.size[1]) // self.tileSize + 1):
-                strLocation = f"{x};{y}"
-                if strLocation in self.data:
-                    tile = self.data[strLocation]
-                    tile.render(self.app.window, offset=self.app.camera.scroll, showRect=showRects)
+
+        for layer in ("background", "midground", "foreground"):
+            for x in range(scroll[0] // self.tileSize, (scroll[0] + window.size[0]) // self.tileSize + 1):
+                for y in range(scroll[1] // self.tileSize, (scroll[1] + window.size[1]) // self.tileSize + 1):
+                    strLocation = f"{x};{y}"
+                    if strLocation in self.data:
+                        tile = self.data[layer][strLocation]
+                        tile.render(self.app.window, offset=self.app.camera.scroll, showRect=showRects)
 
 class SkyBox:
     def __init__(self, app, tilemap, cloudSize:list[int], cloudCount:int=16) -> None:
