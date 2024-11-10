@@ -2,10 +2,9 @@ import blackforge.assets
 from .globs import pg
 
 class Entity:
-    def __init__(self, id:int, app, type:str, size:list[int], location:list[float], assetID:str=None) -> None:
+    def __init__(self, id:int, app, size:list[int], location:list[float], assetID:str=None) -> None:
         self.id = id
         self.app = app
-        self.type = type
         self.size = size
         self.location = location
         self.assetID:str = assetID
@@ -22,6 +21,11 @@ class Entity:
     def renderRect(self) -> None:
         blackforge.assets.drawRect(self.app.window.canvas, self.size, (self.location[0] - self.app.camera.scroll[0], self.location[1] - self.app.camera.scroll[1]), [0, 255, 0], width=1)
 
+    def renderLookupRegion(self, tilemap) -> None:
+        tiles = tilemap.lookupTiles(self.size, self.location)
+        for tile in tiles:
+            blackforge.assets.drawRect(self.app.window.canvas, [tilemap.tileSize, tilemap.tileSize], [tile.topleft[0] - self.app.camera.scroll[0], tile.topleft[1] - self.app.camera.scroll[1]], [255, 255, 255], width=1)
+
     def render(self, showRect:bool=0) -> None:
         try:
             image = self.app.assets.getImage(self.assetID)
@@ -32,16 +36,15 @@ class Entity:
     def update(self, *args, **kwargs) -> None: raise NotImplementedError
 
 class StaticEntity(Entity):
-    def __init__(self, id:int, app, type:str, size:list[int], location:list[float], assetID:str=None) -> None:
-        super().__init__(id, app, type, size, location, assetID=assetID)
+    def __init__(self, id:int, app, size:list[int], location:list[float], assetID:str=None) -> None:
+        super().__init__(id, app, size, location, assetID=assetID)
 
     def update(self, *args, **kwargs) -> None:
         ...
 
 class DynamicEntity(Entity):
-    def __init__(self, id:int, app, type:str, size:list[int], location:list[float], assetID:str=None, regionOffset:list[int]=[1, 1]) -> None:
-        super().__init__(id, app, type, size, location, assetID=assetID)
-        self.regionOffset = regionOffset
+    def __init__(self, id:int, app, size:list[int], location:list[float], assetID:str=None) -> None:
+        super().__init__(id, app, size, location, assetID=assetID)
         self.velocity:list[float] = [0.0, 0.0]
         self.movement:dict[str, bool] = {
             "up": 0,
@@ -74,10 +77,10 @@ class DynamicEntity(Entity):
             (self.movement["right"] - self.movement["left"]) + self.velocity[0],
             (self.movement["down"] - self.movement["up"]) + self.velocity[1],
         ]
-        
+
         self.location[0] += transformation[0]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.location, regionOffset=self.regionOffset):
+        for tile in tilemap.lookupTiles(self.size, self.location):
             if rect.colliderect(tile):
                 if transformation[0] > 0:
                     rect.right = tile.left
@@ -89,7 +92,7 @@ class DynamicEntity(Entity):
 
         self.location[1] += transformation[1]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.location, regionOffset=self.regionOffset):
+        for tile in tilemap.lookupTiles(self.size, self.location):
             if rect.colliderect(tile):
                 if transformation[1] > 0:
                     rect.bottom = tile.top
@@ -107,4 +110,3 @@ class DynamicEntity(Entity):
         self.velocity[1] = min(3, self.velocity[1] + 0.1)
         if self.collisions["up"] or self.collisions["down"]:
             self.velocity[1] = 0
-

@@ -2,7 +2,7 @@ import blackforge.assets, blackforge.entity
 
 class GameObject(blackforge.entity.DynamicEntity):
     def __init__(self, app, size:list[int], location:list[float], assetID:str="player") -> None:
-        super().__init__(0, app, assetID, size, location, assetID)
+        super().__init__(0, app, size, location, assetID)
         self.action = "idle"
         self.actions:dict[bool] = {
             "run": 0,

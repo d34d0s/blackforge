@@ -3,7 +3,7 @@ import blackforge.resource, blackforge.assets, blackforge.entity
 
 class StaticTile(blackforge.entity.StaticEntity):
     def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0, layer:str="background") -> None:
-        super().__init__(0, app, "tile", [size, size], location, assetID=asset)
+        super().__init__(0, app, [size, size], location, assetID=asset)
         self.asset:str = asset
         self.layer:str = layer
         self.variant:int = variant
@@ -22,7 +22,7 @@ class StaticTile(blackforge.entity.StaticEntity):
 
 class DynamicTile(blackforge.entity.DynamicEntity):
     def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0, layer:str="background") -> None:
-        super().__init__(0, app, "tile", [size, size], location, assetID=asset)
+        super().__init__(0, app, [size, size], location, assetID=asset)
         self.asset:str = asset
         self.layer:str = layer
         self.variant:int = variant
@@ -41,7 +41,7 @@ class DynamicTile(blackforge.entity.DynamicEntity):
 
 class CloudEntity(blackforge.entity.DynamicEntity):
     def __init__(self, app, speed:int, depth:int, size:list[int], location:list[float]) -> None:
-        super().__init__(0, app, "cloud", size, location, "clouds")
+        super().__init__(0, app, size, location, "clouds")
         self.speed = speed
         self.depth = depth
 
@@ -108,33 +108,29 @@ class TileMap:
             tile.location = [*map(int, strLocation.split(";"))]
             self.data["tiles"][tile.layer][strLocation] = tile
 
-    def getLookupRegion(self, regionOffset:list[int]=[0, 0]) -> list[list]:
-        return [
-            ( 0, -1 )   , # up
-            ( 0,  1 )   , # down
-            (-1,  0 )   , # left
-            ( 1,  0 )   , # right
-            
-            ( 0,  0 )   , # center
-            
-            (-1, -1 )   , # top-left
-            ( 1, -1 )   , # top-right
-            (-1,  1 )   , # bottom-left
-            ( 1,  1 )   , # bottom-right
-        ]
+    def getLookupRegion(self, size:list[int], location:list[int]) -> list[list]:
+        region = []
+        right = int((location[0] + size[0]) // self.tileSize)
+        bottom = int((location[1] + size[1]) // self.tileSize)
+        top = int((location[1] - size[1] / 2) // self.tileSize)
+        left = int((location[0] - size[0] / 2) // self.tileSize)
 
-    def getTilesInRegion(self, location, layer:str="background", regionOffset:list[int]=[0, 0]) -> list[set]:
+        for x in range(left, right + 1):
+            for y in range(top, bottom + 1):
+                region.append((x, y))
+        return region
+
+    def getTilesInRegion(self, size:list[int], location:list[int], layer:str="background") -> list[set]:
         tiles = []
-        tileLocation = (int(location[0] // self.tileSize), int(location[1] // self.tileSize))
-        for offset in self.getLookupRegion(regionOffset):
-            strLocation = f"{tileLocation[0] + offset[0] + regionOffset[0]};{tileLocation[1] + offset[1] + regionOffset[1]}"
+        for gridLocation in self.getLookupRegion(size, location):
+            strLocation = f"{gridLocation[0]};{gridLocation[1]}"
             if strLocation in self.data["tiles"][layer]:
                 tiles.append(self.data["tiles"][layer][strLocation])
         return tiles
 
-    def lookupTiles(self, location:list[int], layer:str="background", regionOffset:list[int]=[0, 0]):
+    def lookupTiles(self, size:list[int], location:list[int], layer:str="background"):
         rects = []
-        for tile in self.getTilesInRegion(location=location, layer=layer, regionOffset=regionOffset):
+        for tile in self.getTilesInRegion(size=size, location=location, layer=layer):
             if tile.physical:
                 rects.append(blackforge.assets.createRect(
                     size=[self.tileSize, self.tileSize],
