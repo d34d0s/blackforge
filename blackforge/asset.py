@@ -31,36 +31,6 @@ class AssetManager:
         try:
             self.image[key] = loadImageSheet(path, frameSize, colorKey)
         except (FileNotFoundError) as err: ...
-
-class Animation:
-    def __init__(self, app, assetName, loop:bool=1, frameDuration:float=5, frameOffset:list[int]=[0, 0]) -> None:
-        self.app = app
-        self.done = 0
-        self.frame = 0
-        self.loop = loop
-        self.frames = []
-        self.assetName = assetName
-        self.frameOffset = frameOffset
-        self.frameDuration = frameDuration
-
-        self.loadFrames()
-
-    def loadFrames(self):
-        self.frames = self.app.assets.getImage(self.assetName)
-
-    def copy(self):
-        return Animation(self.app, self.assetName, self.assetPath, self.frameDuration)
-
-    def getFrame(self):
-        return self.frames[int(self.frame / self.frameDuration)]
-
-    def update(self) -> None:
-        if self.loop:
-            self.frame = (self.frame + 1) % (self.frameDuration * len(self.frames))
-        else:
-            self.frame = min(self.frame + 1, self.frameDuration * len(self.frames) - 1)
-            if self.frames >= self.frameDuration * len(self.frames) - 1:
-                self.done = 1
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #

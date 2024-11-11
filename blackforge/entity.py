@@ -1,4 +1,4 @@
-import blackforge.assets
+import blackforge.asset
 from .globs import pg
 
 class Entity:
@@ -16,15 +16,15 @@ class Entity:
         ]
 
     def rect(self) -> pg.Rect:
-        return blackforge.assets.createRect(self.location, self.size)
+        return blackforge.asset.createRect(self.location, self.size)
     
     def renderRect(self) -> None:
-        blackforge.assets.drawRect(self.app.window.canvas, self.size, (self.location[0] - self.app.camera.scroll[0], self.location[1] - self.app.camera.scroll[1]), [0, 255, 0], width=1)
+        blackforge.asset.drawRect(self.app.window.canvas, self.size, (self.location[0] - self.app.camera.scroll[0], self.location[1] - self.app.camera.scroll[1]), [0, 255, 0], width=1)
 
     def renderLookupRegion(self, tilemap) -> None:
-        tiles = tilemap.lookupTiles(self.size, self.location)
+        tiles = tilemap.getTileRegionRects(self.size, self.location)
         for tile in tiles:
-            blackforge.assets.drawRect(self.app.window.canvas, [tilemap.tileSize, tilemap.tileSize], [tile.topleft[0] - self.app.camera.scroll[0], tile.topleft[1] - self.app.camera.scroll[1]], [255, 255, 255], width=1)
+            blackforge.asset.drawRect(self.app.window.canvas, [tilemap.tileSize, tilemap.tileSize], [tile.topleft[0] - self.app.camera.scroll[0], tile.topleft[1] - self.app.camera.scroll[1]], [255, 255, 255], width=1)
 
     def render(self, showRect:bool=0) -> None:
         try:
@@ -80,7 +80,7 @@ class DynamicEntity(Entity):
 
         self.location[0] += transformation[0]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.size, self.location):
+        for tile in tilemap.getTileRegionRects(self.size, self.location):
             if rect.colliderect(tile):
                 if transformation[0] > 0:
                     rect.right = tile.left
@@ -92,7 +92,7 @@ class DynamicEntity(Entity):
 
         self.location[1] += transformation[1]
         rect = self.rect()
-        for tile in tilemap.lookupTiles(self.size, self.location):
+        for tile in tilemap.getTileRegionRects(self.size, self.location):
             if rect.colliderect(tile):
                 if transformation[1] > 0:
                     rect.bottom = tile.top

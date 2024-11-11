@@ -1,5 +1,5 @@
 import os, random, json
-import blackforge.resource, blackforge.assets, blackforge.entity
+import blackforge.resource, blackforge.asset, blackforge.entity
 
 class StaticTile(blackforge.entity.StaticEntity):
     def __init__(self, app, asset:str, size:int, location:list[int], physical:bool=0, variant:int=0, layer:str="background") -> None:
@@ -10,7 +10,7 @@ class StaticTile(blackforge.entity.StaticEntity):
         self.physical:bool = physical
 
     def renderRect(self, window:blackforge.resource.Window, offset:list[float]=[0, 0]) -> None:
-        blackforge.assets.drawRect(window.canvas, self.size, ((self.location[0] * self.size[0]) - offset[0], (self.location[1] * self.size[1]) - offset[1]), [0, 255, 0], width=1)
+        blackforge.asset.drawRect(window.canvas, self.size, ((self.location[0] * self.size[0]) - offset[0], (self.location[1] * self.size[1]) - offset[1]), [0, 255, 0], width=1)
 
     def render(self, window:blackforge.resource.Window, offset:list[float]=[0, 0], showRect:bool=0) -> None:
         try:
@@ -29,7 +29,7 @@ class DynamicTile(blackforge.entity.DynamicEntity):
         self.physical:bool = physical
 
     def renderRect(self, window:blackforge.resource.Window, offset:list[float]=[0, 0]) -> None:
-        blackforge.assets.drawRect(window.canvas, self.size, ((self.location[0] * self.size[0]) - offset[0], (self.location[1] * self.size[1]) - offset[1]), [0, 255, 0], width=1)
+        blackforge.asset.drawRect(window.canvas, self.size, ((self.location[0] * self.size[0]) - offset[0], (self.location[1] * self.size[1]) - offset[1]), [0, 255, 0], width=1)
 
     def render(self, window:blackforge.resource.Window, offset:list[float]=[0, 0], showRect:bool=0) -> None:
         try:
@@ -108,7 +108,29 @@ class TileMap:
             tile.location = [*map(int, strLocation.split(";"))]
             self.data["tiles"][tile.layer][strLocation] = tile
 
-    def getLookupRegion(self, size:list[int], location:list[int]) -> list[list]:
+    def getMouseMapLocation(self) -> list[int]:
+        canvasLocation = self.app.window.getMouseLocation()
+        return [
+            int(canvasLocation[0] + self.app.camera.scroll[0]),
+            int(canvasLocation[1] + self.app.camera.scroll[1])
+        ]
+    
+    def getMouseGridLocation(self) -> list[int]:
+        canvasLocation = self.app.window.getMouseLocation()
+        return [
+            int(canvasLocation[0] + self.app.camera.scroll[0] // self.tileSize),
+            int(canvasLocation[1] + self.app.camera.scroll[1] // self.tileSize)
+        ]
+
+    def getTile(self, location:list[int], layer:str="background", remove:bool=0) -> StaticTile | DynamicTile | None:
+        strLocation = f"{int(location[0] // self.tileSize)};{int(location[1] // self.tileSize)}"
+        if not remove: return self.data["tiles"][layer].get(strLocation, None)
+        else:
+            tile = self.data["tiles"][layer].get(strLocation, None)
+            if tile: del self.data["tiles"][layer][strLocation]
+            return tile
+
+    def _genLookupRegion(self, size:list[int], location:list[int]) -> list[list]:
         region = []
         right = int((location[0] + size[0]) // self.tileSize)
         bottom = int((location[1] + size[1]) // self.tileSize)
@@ -120,24 +142,24 @@ class TileMap:
                 region.append((x, y))
         return region
 
-    def getTilesInRegion(self, size:list[int], location:list[int], layer:str="background") -> list[set]:
+    def getTileRegion(self, size:list[int], location:list[int], layer:str="background") -> list[set]:
         tiles = []
-        for gridLocation in self.getLookupRegion(size, location):
+        for gridLocation in self._genLookupRegion(size, location):
             strLocation = f"{gridLocation[0]};{gridLocation[1]}"
             if strLocation in self.data["tiles"][layer]:
                 tiles.append(self.data["tiles"][layer][strLocation])
         return tiles
 
-    def lookupTiles(self, size:list[int], location:list[int], layer:str="background"):
+    def getTileRegionRects(self, size:list[int], location:list[int], layer:str="background"):
         rects = []
-        for tile in self.getTilesInRegion(size=size, location=location, layer=layer):
+        for tile in self.getTileRegion(size=size, location=location, layer=layer):
             if tile.physical:
-                rects.append(blackforge.assets.createRect(
+                rects.append(blackforge.asset.createRect(
                     size=[self.tileSize, self.tileSize],
                     location=[ tile.location[0] * self.tileSize, tile.location[1] * self.tileSize ]
                 ))
         return rects
-
+    
     def render(self, showRects:bool=0) -> None:
         window = self.app.window
         scroll = self.app.camera.scroll

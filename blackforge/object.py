@@ -1,4 +1,4 @@
-import blackforge.assets, blackforge.entity
+import blackforge.asset, blackforge.entity, blackforge.gfx
 
 class GameObject(blackforge.entity.DynamicEntity):
     def __init__(self, app, size:list[int], location:list[float], assetID:str="player") -> None:
@@ -16,8 +16,8 @@ class GameObject(blackforge.entity.DynamicEntity):
             "air-time": 0,
         }
         self.image = None
-        self.animation = None
-        self.animations:dict[blackforge.assets.Animation] = {}
+        self.animation:blackforge.gfx.Animation = None
+        self.animations:dict[blackforge.gfx.Animation] = {}
 
     def newState(self, flag:str, value) -> None:
         if flag not in self.state:
@@ -36,7 +36,7 @@ class GameObject(blackforge.entity.DynamicEntity):
             self.state.pop(flag)
 
     def addAnimation(self, animName:str, assetName:str, loop:bool, frameDuration:float=5, frameOffset:list[int]=[0, 0]) -> None:
-        self.animations[animName] = blackforge.assets.Animation(self.app, assetName, loop=loop, frameDuration=frameDuration, frameOffset=frameOffset)
+        self.animations[animName] = blackforge.gfx.Animation(self.app, assetName, loop=loop, frameDuration=frameDuration, frameOffset=frameOffset)
 
     def setAction(self, action:str) -> None:
         try:
@@ -69,7 +69,7 @@ class GameObject(blackforge.entity.DynamicEntity):
 
     def render(self, showRect:bool = 0) -> None:
         try:
-            image = blackforge.assets.flipSurface(
+            image = blackforge.asset.flipSurface(
                 x=self.state.get("flip-x", False),
                 y=False,
                 surface=self.animation.getFrame()
@@ -78,17 +78,21 @@ class GameObject(blackforge.entity.DynamicEntity):
                 (self.location[0] - self.animation.frameOffset[0]) - self.app.camera.scroll[0],
                 (self.location[1] - self.animation.frameOffset[1]) - self.app.camera.scroll[1]
             ]
+            self.app.window.blit(image, renderLocation)
         except (TypeError, AttributeError) as err:
-            image = blackforge.assets.flipSurface(
-                x=self.state.get("flip-x", False),
-                y=False,
-                surface=self.app.assets.getImage(self.assetID)
-            )
-            renderLocation = [
-                self.location[0] - self.app.camera.scroll[0],
-                self.location[1] - self.app.camera.scroll[1]
-            ]
+            try:
+                image = self.app.assets.getImage(self.assetID)
+                image = blackforge.asset.flipSurface(
+                    x=self.state.get("flip-x", False),
+                    y=False,
+                    surface=image
+                )
+                renderLocation = [
+                    self.location[0] - self.app.camera.scroll[0],
+                    self.location[1] - self.app.camera.scroll[1]
+                ]
 
-        self.app.window.blit(image, renderLocation)
+                self.app.window.blit(image, renderLocation)
+            except (TypeError, KeyError): ...
         if showRect: self.renderRect()
 

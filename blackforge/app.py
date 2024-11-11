@@ -1,8 +1,8 @@
-import blackforge.resource, blackforge.events, blackforge.assets, blackforge.world
+import blackforge.resource, blackforge.events, blackforge.asset, blackforge.world
 from .globs import _logger
 
 class Application:
-    assets = blackforge.assets.AssetManager()
+    assets = blackforge.asset.AssetManager()
     
     def __init__(
             self,

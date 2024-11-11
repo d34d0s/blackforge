@@ -1,3 +1,4 @@
+import blackforge.input
 from .globs import _logger, pg, time, _blackforge_dir_
 
 class Clock:
@@ -46,6 +47,13 @@ class Window:
         try:
             pg.display.set_caption(title)
         except (TypeError) as err: return None
+
+    def getMouseLocation(self) -> list[float]:
+        location = blackforge.input.Mouse.getLocation()
+        return [
+            location[0] / self.zoom,
+            location[1] / self.zoom
+        ]
 
     def clear(self) -> None:
         self.display.fill(self.color)

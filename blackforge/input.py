@@ -159,3 +159,9 @@ class Mouse:
     RightClick = 3
     WheelUp = 4
     WheelDown = 5
+
+    def getRelativeLocation() -> list:
+        return pg.mouse.get_rel()
+    
+    def getLocation() -> list:
+        return pg.mouse.get_pos()
