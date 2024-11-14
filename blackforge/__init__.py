@@ -11,6 +11,8 @@ import blackforge.world as world
 import blackforge.entity as entity
 import blackforge.object as object
 
+import blackforge.AI as AI
+
 import os, platform, blackforge.version as ver
 if "BLACKFORGE_NO_PROMT" not in os.environ:
     print(

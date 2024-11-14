@@ -23,7 +23,7 @@ class GameObject(blackforge.entity.DynamicEntity):
         if flag not in self.state:
             self.state[flag] = value
 
-    def getState(self, flag:str) -> None:
+    def getState(self, flag:str):
         if flag in self.state:
             return self.state[flag]
 
@@ -45,9 +45,8 @@ class GameObject(blackforge.entity.DynamicEntity):
             self.actions[self.action] = 1
             self.animation = self.animations[self.action]
         except (KeyError) as err: ...
-        
 
-    def update(self, tilemap) -> None:
+    def update(self, tilemap:blackforge.world.TileMap) -> None:
         super().update(tilemap)
         try:
             self.animation.update()
