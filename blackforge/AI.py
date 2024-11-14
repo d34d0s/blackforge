@@ -1,3 +1,10 @@
+"""
+BLACKFORGE [ sub-module ]
+
+The AI sub-module provides functions that are intended to act as
+method-overrides for the blackforge.object.GameObject `update()` method
+"""
+
 import random
 import blackforge.asset
 import blackforge.world
@@ -57,10 +64,11 @@ def roamStopWL(tilemap:blackforge.world.TileMap, object:blackforge.object.GameOb
         object.setState("walk-dist", max(0, object.getState("walk-dist") - 1))
         object.move("left") if object.getState("flip-x") else object.move("right")
     
+    # 1/100 chance of random distance between min and max dist
+    # 1frame/1.67sec at 60fps
     elif random.random() < 0.01:
         object.setState("walk-dist", random.randint(minDist, maxDist))
     else:
         object.stop("left") if object.getState("flip-x") else object.stop("right")
 
     object.update(tilemap)
-

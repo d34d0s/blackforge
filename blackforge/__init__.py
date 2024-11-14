@@ -1,3 +1,9 @@
+"""
+d34d0s' BLACKFORGE
+
+[ game development framework ]
+"""
+
 import blackforge.app as app
 
 import blackforge.input as input
