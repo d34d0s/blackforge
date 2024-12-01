@@ -22,5 +22,5 @@ import blackforge.AI as AI
 import os, platform, blackforge.version as ver
 if "BLACKFORGE_NO_PROMT" not in os.environ:
     print(
-        f"BlackForge {ver.BLACKFORGE_MAJOR}.{ver.BLACKFORGE_MINOR}.{ver.BLACKFORGE_PATCH}.{ver.BLACKFORGE_YEAR} | Random Quote Here..."
+        f"BlackForge {ver.BLACKFORGE_YEAR}.{ver.BLACKFORGE_MINOR}.{ver.BLACKFORGE_PATCH} | Random Quote Here..."
     )

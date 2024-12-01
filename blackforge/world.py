@@ -76,7 +76,7 @@ def loadWorldForge2Data(app, mapPath:str) -> dict[str]:
 
             size = int(data["mapInfo"]["tilesize"])
             variant = data[tileLayer][gridLocation]["id"]
-            asset = data[tileLayer][gridLocation]["asset"]
+            asset = data[tileLayer][gridLocation]["asset"].replace("/", "\\")
             physical = data[tileLayer][gridLocation]["properties"]["collisions"]
             tileInfo[tileLayer][gridLocation] = {
                 "size": size,

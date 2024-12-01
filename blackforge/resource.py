@@ -64,8 +64,9 @@ class Window:
         
     def render(self):
         self.display.blit(pg.transform.scale(self.canvas, self.size), [0, 0])
-        pg.display.flip()
         self.canvas = pg.Surface([int(self.size[0]/self.zoom), int(self.size[1]/self.zoom)])
+        
+    def update(self): pg.display.flip()
 
 class Camera:
     def __init__(self, window) -> None:
